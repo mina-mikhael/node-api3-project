@@ -42,10 +42,17 @@ router.post("/", validateUser, (req, res) => {
     });
 });
 
-router.put("/:id", (req, res) => {
+router.put("/:id", validateUserId, validateUser, (req, res) => {
   // RETURN THE FRESHLY UPDATED USER OBJECT
   // this needs a middleware to verify user id
   // and another middleware to check that the request body is valid
+  Users.update(req.params.id, req.newUser)
+    .then((updatedUser) => {
+      res.status(201).json(updatedUser);
+    })
+    .catch(() => {
+      res.status(500).json({ message: "server error" });
+    });
 });
 
 router.delete("/:id", validateUserId, (req, res) => {
