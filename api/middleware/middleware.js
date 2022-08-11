@@ -2,9 +2,9 @@ const Users = require("../users/users-model");
 
 function logger(req, res, next) {
   console.log(
-    `Request method: ${req.method}, Request url: ${
-      req.originalUrl
-    }, Timestamp: ${new Date().toISOString()}`
+    `Request method: ${req.method}, 
+    Request url: ${req.originalUrl},
+     Timestamp: ${new Date().toISOString()}`
   );
   next();
 }
@@ -19,29 +19,33 @@ function validateUserId(req, res, next) {
         next();
       }
     })
-    .catch((err) => console.log(err));
+    .catch(() => {
+      res.status(500).json({ message: "server messed up" });
+    });
 }
 
 function validateUser(req, res, next) {
   // DO YOUR MAGIC
-  if (!req.body.name || req.body.name.trim() === "") {
+  const { name } = req.body;
+  if (!name || name.trim() === "") {
     res.status(400).json({
       message: "missing required name field",
     });
   } else {
-    req.newUser = { name: req.body.name.trim() };
+    req.userName = { name: name.trim() };
     next();
   }
 }
 
 function validatePost(req, res, next) {
   // DO YOUR MAGIC
-  if (!req.body.text || req.body.text.trim() === "") {
+  const { text } = req.body;
+  if (!text || text.trim() === "") {
     res.status(400).json({
       message: "missing required text field",
     });
   } else {
-    req.newPostText = req.body.text.trim();
+    req.newPostText = text.trim();
     next();
   }
 }
