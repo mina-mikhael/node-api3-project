@@ -12,10 +12,9 @@ function logger(req, res, next) {
 function validateUserId(req, res, next) {
   Users.getById(req.params.id).then((user) => {
     if (!user) {
-      res.status(400).json({ message: "something" });
+      res.status(404).json({ message: "user not found" });
       return;
     }
-
     req.foundUser = user;
     next();
   });

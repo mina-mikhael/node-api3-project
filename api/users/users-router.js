@@ -3,18 +3,29 @@ const express = require("express");
 // You will need `users-model.js` and `posts-model.js` both
 // The middleware functions also need to be required
 
+//models import
 const Users = require("./users-model");
 const Posts = require("../posts/posts-model");
+// middlewares import
+const { validateUserId } = require("../middleware/middleware");
 
 const router = express.Router();
 
 router.get("/", (req, res) => {
   // RETURN AN ARRAY WITH ALL THE USERS
+  Users.get()
+    .then((users) => {
+      res.json(users);
+    })
+    .catch(() => {
+      res.status(500).json({ message: "server error" });
+    });
 });
 
-router.get("/:id", (req, res) => {
+router.get("/:id", validateUserId, (req, res) => {
   // RETURN THE USER OBJECT
   // this needs a middleware to verify user id
+  res.json(req.foundUser);
 });
 
 router.post("/", (req, res) => {
@@ -28,9 +39,16 @@ router.put("/:id", (req, res) => {
   // and another middleware to check that the request body is valid
 });
 
-router.delete("/:id", (req, res) => {
+router.delete("/:id", validateUserId, (req, res) => {
   // RETURN THE FRESHLY DELETED USER OBJECT
   // this needs a middleware to verify user id
+  Users.remove(req.params.id)
+    .then(() => {
+      res.json(req.foundUser);
+    })
+    .catch(() => {
+      res.status(500).json({ message: "server screwed up" });
+    });
 });
 
 router.get("/:id/posts", (req, res) => {
@@ -45,3 +63,4 @@ router.post("/:id/posts", (req, res) => {
 });
 
 // do not forget to export the router
+module.exports = router;
