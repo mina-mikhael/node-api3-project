@@ -7,7 +7,7 @@ const express = require("express");
 const Users = require("./users-model");
 const Posts = require("../posts/posts-model");
 // middlewares import
-const { validateUserId } = require("../middleware/middleware");
+const { validateUserId, validateUser, validatePost } = require("../middleware/middleware");
 
 const router = express.Router();
 
@@ -28,9 +28,17 @@ router.get("/:id", validateUserId, (req, res) => {
   res.json(req.foundUser);
 });
 
-router.post("/", (req, res) => {
+router.post("/", validateUser, (req, res) => {
   // RETURN THE NEWLY CREATED USER OBJECT
   // this needs a middleware to check that the request body is valid
+
+  Users.insert(req.body)
+    .then((user) => {
+      res.status(201).json(user);
+    })
+    .catch(() => {
+      res.status(500).json({ message: "server error" });
+    });
 });
 
 router.put("/:id", (req, res) => {
@@ -51,12 +59,19 @@ router.delete("/:id", validateUserId, (req, res) => {
     });
 });
 
-router.get("/:id/posts", (req, res) => {
+router.get("/:id/posts", validateUserId, (req, res) => {
   // RETURN THE ARRAY OF USER POSTS
   // this needs a middleware to verify user id
+  Users.getUserPosts(req.params.id)
+    .then((userPosts) => {
+      res.json(userPosts);
+    })
+    .catch(() => {
+      res.status(500).json({ message: "server screwed up" });
+    });
 });
 
-router.post("/:id/posts", (req, res) => {
+router.post("/:id/posts", validateUserId, validatePost, (req, res) => {
   // RETURN THE NEWLY CREATED USER POST
   // this needs a middleware to verify user id
   // and another middleware to check that the request body is valid
