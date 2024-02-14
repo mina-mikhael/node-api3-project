@@ -1,13 +1,24 @@
-const express = require('express');
+const express = require("express");
+const cors = require("cors");
+const { logger } = require("./middleware/middleware");
+const userRouter = require("./users/users-router");
 
 const server = express();
+server.use(express.json()); // this line is needed to parse JSON from the body
+server.use(cors());
+server.use(logger);
 
-// remember express by default cannot parse JSON in request bodies
+server.use("/api/users", userRouter);
 
-// global middlewares and the user's router need to be connected here
+server.use("*", (req, res, next) => {
+  next({ status: 404, message: "not found" });
+});
 
-server.get('/', (req, res) => {
-  res.send(`<h2>Let's write some middleware!</h2>`);
+// eslint-disable-next-line
+server.use((err, req, res, next) => {
+  res.status(err.status || 500).json({
+    message: err.message || "Internal server error",
+  });
 });
 
 module.exports = server;
